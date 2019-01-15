@@ -640,6 +640,9 @@ def test_gossip_query_channel_range(node_factory, bitcoind):
                                          first=0,
                                          num=1000000)
 
+    # Turns out it sends: 0+53, 53+26, 79+13, 92+7, 99+3, 102+2, 104+1, 105+999895
+    l1.daemon.wait_for_logs([r'\[IN\] 0108'] * 8)
+
     # It should definitely have split
     assert ret['final_first_block'] != 0 or ret['final_num_blocks'] != 1000000
     assert ret['final_complete']
@@ -647,6 +650,16 @@ def test_gossip_query_channel_range(node_factory, bitcoind):
     assert ret['short_channel_ids'][0] == scid12
     assert ret['short_channel_ids'][1] == scid23
     l2.daemon.wait_for_log('queue_channel_ranges full: splitting')
+
+    # Test overflow case doesn't split forever; should still only get 8 for this
+    ret = l1.rpc.dev_query_channel_range(id=l2.info['id'],
+                                         first=1,
+                                         num=429496000)
+    l1.daemon.wait_for_logs([r'\[IN\] 0108'] * 8)
+
+    # And no more!
+    time.sleep(1)
+    assert not l1.daemon.is_in_log(r'\[IN\] 0108', start=l1.daemon.logsearch_start)
 
     # This should actually be large enough for zlib to kick in!
     l3.fund_channel(l4, 10**5)

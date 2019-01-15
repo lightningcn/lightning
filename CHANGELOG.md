@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+<<<<<<< HEAD
+=======
+## [Unreleased]
+
+
+### Added
+
+- plugins: fully enabled, and ready for you to write some!
+- lightning-cli: `help <cmd>` finds man pages even if `make install` not run.
+- JSON API: `waitsendpay` now has an `erring_direction` field.
+- JSON API: `listpeers` now has a `direction` field in `channels`.
+- JSON API: `listchannels` now takes a `source` option to filter by node id.
+
+### Changed
+
+- The `short_channel_id` separator has been changed to be `x` to match the specification.
+
+### Deprecated
+
+Note: You should always set `allow-deprecated-apis=false` to test for
+changes.
+
+### Removed
+
+### Fixed
+
+- Protocol: handling `query_channel_range` for large numbers of blocks
+  (eg. 4 billion) was slow due to a bug.
+
+### Security
+
+>>>>>>> 0ba547ee... gossipd: handle overflowing query properly (avoid slow 100% CPU reports)
 ## [0.6.3] - 2019-01-09: "The Smallblock Conspiracy"
 
 This release named by @molxyz and [@ctrlbreak](https://twitter.com/ctrlbreak).
