@@ -39,13 +39,6 @@ if [ "$CHAIN" == "ltc" ]; then
     fi
 fi
 
-if [[ $LIGHTNINGD_EXPLORERURL && $NETWORK && $CHAIN ]]; then
-    # We need to do that because clightning behave weird if it starts at same time as bitcoin core, or if the node is not synched
-    echo "Waiting for the node to start and sync"
-    dotnet /opt/NBXplorer.NodeWaiter/NBXplorer.NodeWaiter.dll --chains "$CHAIN" --network "$NETWORK" --explorerurl "$LIGHTNINGD_EXPLORERURL"
-    echo "Node synched"
-fi
-
 if [[ $TRACE_TOOLS == "true" ]]; then
 echo "Trace tools detected, installing sample.sh..."
 echo 0 > /proc/sys/kernel/kptr_restrict
@@ -95,5 +88,8 @@ if [ "$EXPOSE_TCP" == "true" ]; then
     socat "TCP4-listen:$LIGHTNINGD_RPC_PORT,fork,reuseaddr" "UNIX-CONNECT:$LIGHTNINGD_DATA/lightning-rpc" &
     fg %-
 else
-    exec lightningd "$@"
+    # NBXplorer.NodeWaiter.dll is a wrapper which wait the full node to be fully synced before starting c-lightning
+    # it also correctly handle SIGINT and SIGTERM so this container can die properly if SIGKILL or SIGTERM is sent
+    exec dotnet /opt/NBXplorer.NodeWaiter/NBXplorer.NodeWaiter.dll --chains "$CHAIN" --network "$NETWORK" --explorerurl "$LIGHTNINGD_EXPLORERURL" -- \
+    lightningd "$@"
 fi

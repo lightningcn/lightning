@@ -85,7 +85,7 @@ RUN apt-get -y update && apt-get -y install git
 
 WORKDIR /source
 
-RUN git clone https://github.com/dgarage/NBXplorer && cd NBXplorer && git checkout v2.0.0.2
+RUN git clone https://github.com/dgarage/NBXplorer && cd NBXplorer && git checkout de6245f0c90a07a676a2df2531bc8e553150a558
 
 # Cache some dependencies
 RUN cd NBXplorer/NBXplorer.NodeWaiter && dotnet restore && cd ..
