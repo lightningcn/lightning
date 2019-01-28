@@ -76,7 +76,7 @@ COPY --from=downloader /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static
 WORKDIR /opt/lightningd
 COPY . .
 ARG DEVELOPER=0
-RUN ./configure --enable-static && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
+RUN ./configure --enable-static --enable-experimental-features && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
 
 # This is a manifest image, will pull the image with the same arch as the builder machine
 FROM microsoft/dotnet:2.1.500-sdk AS dotnetbuilder

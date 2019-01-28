@@ -59,7 +59,7 @@ WORKDIR /opt/lightningd
 COPY . .
 
 ARG DEVELOPER=0
-RUN ./configure && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
+RUN ./configure --enable-experimental-features && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
 
 # This is a manifest image, will pull the image with the same arch as the builder machine
 FROM microsoft/dotnet:2.1.500-sdk AS dotnetbuilder
