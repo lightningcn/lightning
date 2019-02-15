@@ -1,4 +1,4 @@
-FROM alpine:3.7 as builder
+FROM alpine:3.9 as builder
 
 RUN apk add --no-cache \
      ca-certificates \
@@ -59,9 +59,9 @@ WORKDIR /opt/lightningd
 COPY . .
 
 ARG DEVELOPER=0
-RUN ./configure && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
+RUN ./configure --enable-experimental-features && make -j3 DEVELOPER=${DEVELOPER} && cp lightningd/lightning* cli/lightning-cli /usr/bin/
 
-FROM alpine:3.7
+FROM alpine:3.9
 
 RUN apk add --no-cache \
      gmp-dev \
@@ -71,9 +71,16 @@ RUN apk add --no-cache \
      bash \
      zlib-dev
 
+ARG TRACE_TOOLS=false
+ENV TRACE_TOOLS=$TRACE_TOOLS
+
 ENV GLIBC_VERSION 2.27-r0
 ENV GLIBC_SHA256 938bceae3b83c53e7fa9cc4135ce45e04aae99256c5e74cf186c794b97473bc7
 ENV GLIBCBIN_SHA256 3a87874e57b9d92e223f3e90356aaea994af67fb76b71bb72abfb809e948d0d6
+
+ENV TRACE_LOCATION=/opt/traces
+VOLUME /opt/traces
+
 # Download and install glibc (https://github.com/jeanblanchard/docker-alpine-glibc/blob/master/Dockerfile)
 RUN apk add --update curl && \
   curl -Lo /etc/apk/keys/sgerrand.rsa.pub https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_VERSION/sgerrand.rsa.pub && \
@@ -84,11 +91,24 @@ RUN apk add --update curl && \
   apk add glibc-bin.apk glibc.apk && \
   /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
   echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
+  ( ! $TRACE_TOOLS || \
+    ( \
+        sed -i -e 's/v[[:digit:]]\.[[:digit:]]/edge/g' /etc/apk/repositories && \
+        echo "http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+        apk add --no-cache perf perl && \
+        mkdir FlameGraph && cd FlameGraph && \
+        curl -Lo FlameGraph.tar.gz "https://github.com/brendangregg/FlameGraph/archive/v1.0.tar.gz" && \
+        tar -zxvf FlameGraph.tar.gz --strip-components=1 && rm FlameGraph.tar.gz && cd .. \
+    ) \
+  ) && \
   apk del curl && \
   rm -rf glibc.apk glibc-bin.apk /var/cache/apk/*
 
 ENV LIGHTNINGD_DATA=/root/.lightning
 ENV LIGHTNINGD_RPC_PORT=9835
+
+RUN mkdir $LIGHTNINGD_DATA && \
+    touch $LIGHTNINGD_DATA/config
 
 VOLUME [ "/root/.lightning" ]
 
