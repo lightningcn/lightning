@@ -13,6 +13,7 @@ http://lightning.network.
 
 ## Project Status
 
+[![CircleCI](https://circleci.com/gh/lightningcn/lightning.svg?style=svg)](https://circleci.com/gh/lightningcn/lightning)
 [![Build Status][travis-ci]][travis-ci-link]
 [![Pull Requests Welcome][prs]][prs-link]
 [![Irc][IRC]][IRC-link]
@@ -122,6 +123,24 @@ volumes:
   bitcoin_datadir:
   clightning_bitcoin_datadir:
 ```
+
+Alternatively you can use `LIGHTNINGD_OPT`:
+
+```
+  clightning_bitcoin:
+    image: elementsproject/lightningd
+    environment:
+      EXPOSE_TCP: "true"
+      LIGHTNINGD_OPT: |
+        bitcoin-rpcconnect=bitcoind
+        bitcoin-rpcuser=rpcuser
+        bitcoin-rpcpassword=rpcpass
+        network=testnet
+        alias=myawesomenode
+        log-level=debug
+```
+
+To select the blockchain you are running LND on, you can alternatively use `LIGHTNINGD_CHAIN` with value `ltc` or `btc` and `LIGHTNINGD_NETWORK` with values `mainnet`, `testnet` or `regtest`).
 
 ### Starting `lightningd`
 
