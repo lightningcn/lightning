@@ -18,6 +18,7 @@ c-lightning is a lightweight, highly customizable and [standard compliant][std] 
 
 ## Project Status
 
+[![CircleCI](https://circleci.com/gh/lightningcn/lightning.svg?style=svg)](https://circleci.com/gh/lightningcn/lightning)
 [![Build Status][travis-ci]][travis-ci-link]
 [![Pull Requests Welcome][prs]][prs-link]
 [![Irc][IRC]][IRC-link]
