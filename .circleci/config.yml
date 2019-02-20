@@ -35,11 +35,10 @@ jobs:
       - checkout
       - run:
           command: |
-            LATEST_TAG=${CIRCLE_TAG:3} #trim "cn-" from tag
             #
-            sudo docker build --build-arg "DEVELOPER=1" --build-arg "TRACE_TOOLS=false" -t "$DOCKERHUB_REPO:$LATEST_TAG-dev" .
+            sudo docker build --build-arg "DEVELOPER=1" --build-arg "TRACE_TOOLS=false" -t "$DOCKERHUB_REPO:dev" .
             sudo docker login --username=$DOCKERHUB_USER --password=$DOCKERHUB_PASS
-            sudo docker push $DOCKERHUB_REPO:$LATEST_TAG-dev
+            sudo docker push $DOCKERHUB_REPO:dev
   publish_docker_bench:
     machine:
       docker_layer_caching: true
@@ -93,12 +92,8 @@ workflows:
               only: /cn-.+/
       - publish_docker_dev:
           filters:
-            # ignore any commit on any branch by default
             branches:
-              ignore: /.*/
-            # only act on version tags
-            tags:
-              only: /cn-.+/
+              only: /.*/ 
       - publish_docker_bench:
           filters:
             # ignore any commit on any branch by default
