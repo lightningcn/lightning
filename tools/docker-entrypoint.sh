@@ -78,7 +78,7 @@ fi
 
 if [ "$EXPOSE_TCP" == "true" ]; then
     set -m
-    lightningd "$@" &
+    lightningd --plugin-dir=/usr/libexec/c-lightning/plugins "$@" &
     echo "C-Lightning starting"
     while read -r i; do if [ "$i" = "lightning-rpc" ]; then break; fi; done \
     < <(inotifywait  -e create,open --format '%f' --quiet "$LIGHTNINGD_DATA" --monitor)
@@ -88,5 +88,5 @@ if [ "$EXPOSE_TCP" == "true" ]; then
     socat "TCP4-listen:$LIGHTNINGD_RPC_PORT,fork,reuseaddr" "UNIX-CONNECT:$LIGHTNINGD_DATA/lightning-rpc" &
     fg %-
 else
-    lightningd "$@"
+    exec lightningd --plugin-dir=/usr/libexec/c-lightning/plugins "$@"
 fi
